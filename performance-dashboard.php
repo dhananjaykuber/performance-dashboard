@@ -22,3 +22,16 @@ define( 'PERFORMANCE_DASHBOARD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Include necessary files.
 require_once PERFORMANCE_DASHBOARD_PLUGIN_DIR . '/includes/class-admin-page.php';
+require_once PERFORMANCE_DASHBOARD_PLUGIN_DIR . '/includes/class-dashboard-data.php';
+
+/**
+ * Activation function.
+ *
+ * @return void
+ */
+function performance_dashboard_activate() {
+	$performance_data = new Dashboard_Data();
+	$performance_data->create_table();
+}
+
+register_activation_hook( __FILE__, 'performance_dashboard_activate' );
