@@ -24,6 +24,7 @@ define( 'PERFORMANCE_DASHBOARD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 require_once PERFORMANCE_DASHBOARD_PLUGIN_DIR . '/includes/class-admin-page.php';
 require_once PERFORMANCE_DASHBOARD_PLUGIN_DIR . '/includes/class-dashboard-data.php';
 require_once PERFORMANCE_DASHBOARD_PLUGIN_DIR . '/includes/class-dashboard-widget.php';
+require_once PERFORMANCE_DASHBOARD_PLUGIN_DIR . '/includes/class-enqueue-scripts.php';
 
 /**
  * Initialize the plugin
@@ -34,6 +35,7 @@ function performance_dashboard_init() {
 	new Dashboard_Data();
 	new Admin_Page();
 	new Dashboard_Widget();
+	new Enqueue_Scripts();
 }
 
 add_action( 'plugins_loaded', 'performance_dashboard_init' );

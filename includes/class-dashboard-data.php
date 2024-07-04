@@ -71,16 +71,16 @@ class Dashboard_Data {
 		}
 
 		// Check if required POST data is set.
-		if ( ! isset( $_POST['url'], $_POST['ttfb'], $_POST['lcp'], $_POST['cls'], $_POST['inp'] ) ) {
+		if ( ! isset( $_POST['url'] ) ) {
 			wp_send_json_error( __( 'Missing required data', 'performance-dashboard' ) );
 		}
 
 		// Sanitize and validate the input data.
 		$url  = sanitize_text_field( wp_unslash( $_POST['url'] ) );
-		$ttfb = floatval( $_POST['ttfb'] );
-		$lcp  = floatval( $_POST['lcp'] );
-		$cls  = floatval( $_POST['cls'] );
-		$inp  = floatval( $_POST['inp'] );
+		$ttfb = isset( $_POST['ttfb'] ) ? floatval( $_POST['ttfb'] ) : null;
+		$lcp  = isset( $_POST['lcp'] ) ? floatval( $_POST['lcp'] ) : null;
+		$cls  = isset( $_POST['cls'] ) ? floatval( $_POST['cls'] ) : null;
+		$inp  = isset( $_POST['inp'] ) ? floatval( $_POST['inp'] ) : null;
 
 		// Prepare data for insertion.
 		$data = array(
@@ -89,6 +89,14 @@ class Dashboard_Data {
 			'lcp'  => $lcp,
 			'cls'  => $cls,
 			'inp'  => $inp,
+		);
+
+		// Remove null values.
+		$data = array_filter(
+			$data,
+			function ( $value ) {
+				return ! is_null( $value );
+			}
 		);
 
 		global $wpdb;
