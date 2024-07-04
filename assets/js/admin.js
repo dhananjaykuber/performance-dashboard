@@ -66,24 +66,4 @@ document.addEventListener('DOMContentLoaded', function () {
   metrics.forEach((metric) => {
     charts[metric] = createChart(metric);
   });
-
-  // URL selector functionality
-  const urlSelect = document.getElementById('url-select');
-  urlSelect.addEventListener('change', function () {
-    const selectedUrl = this.value;
-    // Here you would fetch new data for the selected URL
-    // and then update the charts
-    // For example:
-    // fetchDataForUrl(selectedUrl).then(newData => {
-    //     updateCharts(newData);
-    // });
-  });
-
-  function updateCharts(newData) {
-    metrics.forEach((metric) => {
-      charts[metric].data.labels = newData.labels;
-      charts[metric].data.datasets[0].data = newData[metric];
-      charts[metric].update();
-    });
-  }
 });
