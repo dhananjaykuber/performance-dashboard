@@ -46,12 +46,12 @@ class Dashboard_Data {
 		$sql = "CREATE TABLE $this->table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             url varchar(255) NOT NULL,
-            ttfb float NOT NULL,
-            lcp float NOT NULL,
-            cls float NOT NULL,
-            inp float NOT NULL,
+            metric_name varchar(10) NOT NULL,
+            metric_value float NOT NULL,
             timestamp datetime DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY  (id)
+            PRIMARY KEY  (id),
+            KEY url (url),
+            KEY metric_name (metric_name)
         ) $charset_collate;";
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -75,36 +75,37 @@ class Dashboard_Data {
 			wp_send_json_error( __( 'Missing required data', 'performance-dashboard' ) );
 		}
 
-		// Sanitize and validate the input data.
-		$url  = sanitize_text_field( wp_unslash( $_POST['url'] ) );
-		$ttfb = isset( $_POST['ttfb'] ) ? floatval( $_POST['ttfb'] ) : null;
-		$lcp  = isset( $_POST['lcp'] ) ? floatval( $_POST['lcp'] ) : null;
-		$cls  = isset( $_POST['cls'] ) ? floatval( $_POST['cls'] ) : null;
-		$inp  = isset( $_POST['inp'] ) ? floatval( $_POST['inp'] ) : null;
+		$url           = sanitize_text_field( wp_unslash( $_POST['url'] ) );
+		$valid_metrics = array( 'ttfb', 'lcp', 'cls', 'inp' );
 
-		// Prepare data for insertion.
-		$data = array(
-			'url'  => $url,
-			'ttfb' => $ttfb,
-			'lcp'  => $lcp,
-			'cls'  => $cls,
-			'inp'  => $inp,
-		);
-
-		// Remove null values.
-		$data = array_filter(
-			$data,
-			function ( $value ) {
-				return ! is_null( $value );
+		$data_to_insert = array();
+		foreach ( $valid_metrics as $metric ) {
+			if ( isset( $_POST[ $metric ] ) ) {
+				$data_to_insert[] = array(
+					'url'          => $url,
+					'metric_name'  => $metric,
+					'metric_value' => floatval( $_POST[ $metric ] ),
+				);
 			}
-		);
+		}
+
+		if ( empty( $data_to_insert ) ) {
+			wp_send_json_error( __( 'No valid metrics provided', 'performance-dashboard' ) );
+		}
 
 		global $wpdb;
 
 		// Insert data into the database.
-		$result = $wpdb->insert( $this->table_name, $data ); // phpcs:ignore
+		$success = true;
+		foreach ( $data_to_insert as $data ) {
+			$result = $wpdb->insert( $this->table_name, $data ); // phpcs:ignore
+			if ( false === $result ) {
+				$success = false;
+				break;
+			}
+		}
 
-		if ( false === $result ) {
+		if ( ! $success ) {
 			wp_send_json_error( __( 'Failed to save data', 'performance-dashboard' ) );
 		} else {
 			wp_send_json_success( __( 'Data saved successfully', 'performance-dashboard' ) );
@@ -124,19 +125,22 @@ class Dashboard_Data {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'performance_data';
 
-		// Initialize the base query.
-		$query = "SELECT * FROM $table_name";
+		$query = "SELECT url, 
+                         MAX(CASE WHEN metric_name = 'ttfb' THEN metric_value END) as ttfb,
+                         MAX(CASE WHEN metric_name = 'lcp' THEN metric_value END) as lcp,
+                         MAX(CASE WHEN metric_name = 'cls' THEN metric_value END) as cls,
+                         MAX(CASE WHEN metric_name = 'inp' THEN metric_value END) as inp,
+                         MAX(timestamp) as timestamp
+                  FROM $table_name";
 
-		// Prepare the query based on whether the URL is provided or not.
 		if ( $url ) {
-			$query         .= ' WHERE url = %s ORDER BY timestamp DESC LIMIT %d';
-			$prepared_query = $wpdb->prepare( $query, $url, $limit ); // phpcs:ignore
-		} else {
-			$query         .= ' ORDER BY timestamp DESC LIMIT %d';
-			$prepared_query = $wpdb->prepare( $query, $limit ); // phpcs:ignore
+			$query .= $wpdb->prepare( ' WHERE url = %s', $url );
 		}
 
-		// Execute the prepared query.
+		$query .= ' GROUP BY url ORDER BY MAX(timestamp) DESC LIMIT %d';
+
+		$prepared_query = $wpdb->prepare( $query, $limit ); // phpcs:ignore
+
 		return $wpdb->get_results( $prepared_query ); // phpcs:ignore
 	}
 }
