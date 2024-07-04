@@ -13,13 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Example URLs array for demonstration purposes.
-// phpcs:ignore
-$urls = array(
-	'https://example.com/page1',
-	'https://example.com/page2',
-	'https://example.com/page3',
-);
 ?>
 
 <div class="wrap performance-dashboard-container">
@@ -44,6 +37,29 @@ $urls = array(
 	</div>
 
 	<div class="performance-dashboard-summary">
-		<!-- Summary data will be populated dynamically in the PHP code -->
+		<?php
+		if ( ! empty( $performance_data ) ) :
+			?>
+			<?php $latest_data = $performance_data[0]; ?>
+			<div class="performance-dashboard-metric">
+				<h3><?php esc_html_e( 'TTFB', 'performance-dashboard' ); ?></h3>
+				<p><?php echo esc_html( round( $latest_data->ttfb, 2 ) ); ?> ms</p>
+			</div>
+			<div class="performance-dashboard-metric">
+				<h3><?php esc_html_e( 'LCP', 'performance-dashboard' ); ?></h3>
+				<p><?php echo esc_html( round( $latest_data->lcp, 2 ) ); ?> ms</p>
+			</div>
+			<div class="performance-dashboard-metric">
+				<h3><?php esc_html_e( 'CLS', 'performance-dashboard' ); ?></h3>
+				<p><?php echo esc_html( round( $latest_data->cls, 3 ) ); ?></p>
+			</div>
+			<div class="performance-dashboard-metric">
+				<h3><?php esc_html_e( 'INP', 'performance-dashboard' ); ?></h3>
+				<p><?php echo esc_html( round( $latest_data->inp, 2 ) ); ?> ms</p>
+			</div>
+		<?php else : ?>
+			<p><?php esc_html_e( 'No performance data available.', 'performance-dashboard' ); ?></p>
+		<?php endif ?>
+			
 	</div>
 </div>

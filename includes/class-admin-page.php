@@ -45,9 +45,30 @@ class Admin_Page {
 	 * Displays the Performance Dashboard admin page content.
 	 */
 	public function display_admin_page() {
+		// Get the list of unique URLs from the database.
+		$urls = $this->get_unique_urls();
+
+		// Get the selected URL from the query parameter, if any.
+		$selected_url = isset( $_GET['url'] ) ? sanitize_text_field( $_GET['url'] ) : ''; // phpcs:ignore
+
+		// Get the performance data for the selected URL.
+		$performance_data = Dashboard_Data::get_performance_data( $selected_url );
+
 		include PERFORMANCE_DASHBOARD_PLUGIN_DIR . 'views/admin-page.php';
 	}
-}
 
-// Instantiate the Performance_Dashboard_Admin_Page class.
-new Admin_Page();
+	/**
+	 * Get unique URLs.
+	 *
+	 * Retrieves a list of unique URLs from the performance data table.
+	 *
+	 * @return array List of unique URLs.
+	 */
+	private function get_unique_urls() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'performance_data';
+
+		// Get a list of distinct URLs from the performance data table.
+		return $wpdb->get_col( "SELECT DISTINCT url FROM $table_name ORDER BY url ASC" ); // phpcs:ignore
+	}
+}
