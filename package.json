@@ -1,0 +1,19 @@
+{
+  "name": "performance-dashboard",
+  "version": "1.0.0",
+  "description": "Collect and display Core Web Vitals data in WordPress dashboard.",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "web-vitals": "^4.2.1"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^28.2.0"
+  }
+}

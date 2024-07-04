@@ -28,7 +28,7 @@ class Enqueue_Scripts {
 	public function enqueue_frontend_scripts() {
 		wp_enqueue_script(
 			'performance-collector',
-			PERFORMANCE_DASHBOARD_PLUGIN_URL . 'assets/js/performance-collector.js',
+			PERFORMANCE_DASHBOARD_PLUGIN_URL . 'build/performance-collector.js',
 			array(),
 			PERFORMANCE_DASHBOARD_VERSION,
 			true
@@ -61,7 +61,7 @@ class Enqueue_Scripts {
 
 		wp_enqueue_style(
 			'performance-dashboard-admin',
-			PERFORMANCE_DASHBOARD_PLUGIN_URL . 'assets/css/admin.css',
+			PERFORMANCE_DASHBOARD_PLUGIN_URL . 'build/admin.css',
 			array(),
 			PERFORMANCE_DASHBOARD_VERSION
 		);
@@ -76,7 +76,7 @@ class Enqueue_Scripts {
 
 		wp_enqueue_script(
 			'performance-dashboard-admin',
-			PERFORMANCE_DASHBOARD_PLUGIN_URL . 'assets/js/admin.js',
+			PERFORMANCE_DASHBOARD_PLUGIN_URL . 'build/admin.js',
 			array( 'jquery', 'chart-js' ),
 			PERFORMANCE_DASHBOARD_VERSION,
 			true

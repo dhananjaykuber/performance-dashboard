@@ -96,16 +96,9 @@ class Dashboard_Data {
 		global $wpdb;
 
 		// Insert data into the database.
-		$success = true;
-		foreach ( $data_to_insert as $data ) {
-			$result = $wpdb->insert( $this->table_name, $data ); // phpcs:ignore
-			if ( false === $result ) {
-				$success = false;
-				break;
-			}
-		}
+		$result = $wpdb->insert( $this->table_name, $data_to_insert[0] ); // phpcs:ignore
 
-		if ( ! $success ) {
+		if ( false === $result ) {
 			wp_send_json_error( __( 'Failed to save data', 'performance-dashboard' ) );
 		} else {
 			wp_send_json_success( __( 'Data saved successfully', 'performance-dashboard' ) );
@@ -115,32 +108,45 @@ class Dashboard_Data {
 	/**
 	 * Get performance data.
 	 *
-	 * Retrieves performance data from the database.
+	 * Retrieves the latest performance data from the database.
 	 *
 	 * @param string|null $url  The URL to filter the data by.
 	 * @param int         $limit The number of records to retrieve.
+	 *
 	 * @return array The retrieved performance data.
 	 */
 	public static function get_performance_data( $url = null, $limit = 10 ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'performance_data';
 
-		$query = "SELECT url, 
-                         MAX(CASE WHEN metric_name = 'ttfb' THEN metric_value END) as ttfb,
-                         MAX(CASE WHEN metric_name = 'lcp' THEN metric_value END) as lcp,
-                         MAX(CASE WHEN metric_name = 'cls' THEN metric_value END) as cls,
-                         MAX(CASE WHEN metric_name = 'inp' THEN metric_value END) as inp,
-                         MAX(timestamp) as timestamp
-                  FROM $table_name";
+		$query = "
+			SELECT t1.url, 
+				MAX(CASE WHEN t1.metric_name = 'ttfb' THEN t1.metric_value END) as ttfb,
+				MAX(CASE WHEN t1.metric_name = 'lcp' THEN t1.metric_value END) as lcp,
+				MAX(CASE WHEN t1.metric_name = 'cls' THEN t1.metric_value END) as cls,
+				MAX(CASE WHEN t1.metric_name = 'inp' THEN t1.metric_value END) as inp,
+				t1.timestamp
+			FROM $table_name t1
+			INNER JOIN (
+				SELECT url, MAX(timestamp) as max_timestamp
+				FROM $table_name
+				GROUP BY url
+			) t2 ON t1.url = t2.url AND t1.timestamp = t2.max_timestamp
+		";
 
+		// Add URL filter if provided.
 		if ( $url ) {
-			$query .= $wpdb->prepare( ' WHERE url = %s', $url );
+			$query .= $wpdb->prepare( ' WHERE t1.url = %s', $url );
 		}
 
-		$query .= ' GROUP BY url ORDER BY MAX(timestamp) DESC LIMIT %d';
+		// Group by URL and timestamp to ensure we get one row per URL.
+		// Order by timestamp descending to get the most recent first.
+		$query .= ' GROUP BY t1.url, t1.timestamp ORDER BY t1.timestamp DESC LIMIT %d';
 
+		// Prepare the query with the limit.
 		$prepared_query = $wpdb->prepare( $query, $limit ); // phpcs:ignore
 
+		// Execute the query and return the results.
 		return $wpdb->get_results( $prepared_query ); // phpcs:ignore
 	}
 }

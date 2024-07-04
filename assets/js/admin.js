@@ -1,3 +1,5 @@
+import '../css/admin.css';
+
 jQuery(document).ready(function ($) {
   if (typeof performanceData !== 'undefined') {
     const ctx = document.getElementById('performanceChart').getContext('2d');
