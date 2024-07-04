@@ -1,3 +1,5 @@
+### Under Development 🚧
+
 # Performance Dashboard
 
 Performance Dashboard is a WordPress plugin that allows site owners to monitor and analyze their site's Core Web Vitals directly from the WordPress admin dashboard. The plugin collects real user metrics without relying on the CrUX report, giving site owners immediate insights into their site's performance.
@@ -21,18 +23,6 @@ Performance Dashboard is a WordPress plugin that allows site owners to monitor a
 
 2. **Performance Dashboard:**
    <img width="1469" alt="Screenshot 2024-07-05 at 12 20 49 AM" src="https://github.com/dhananjaykuber/performance-dashboard/assets/64325240/faac2fb7-92be-43aa-9e50-5f0b967a0bd8">
-
-## Changelog
-
-### 1.0.0
-
-- Initial release of the Performance Dashboard plugin.
-
-## Upgrade Notice
-
-### 1.0.0
-
-- Initial release.
 
 ## Development
 
